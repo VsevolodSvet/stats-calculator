@@ -14,17 +14,19 @@ import java.util.*
 import kotlin.jvm.Throws
 
 class UserDetailsServiceImpl : UserDetailsService {
+
     @Autowired
-    private lateinit var userDao: UserDao
+    private var userDao: UserDao? = null
 
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val user: User = userDao.findByUsername(username)
+        val user: User = userDao!!.findByUsername(username)
         val grantedAuthorities: MutableSet<GrantedAuthority> = HashSet()
-        for (role: Role in user.roles) {
-            grantedAuthorities.add(SimpleGrantedAuthority(role.name))
+        for (role: Role? in user.getRoles()!!) {
+            grantedAuthorities.add(SimpleGrantedAuthority(role!!.getName()))
         }
-        return org.springframework.security.core.userdetails.User(user.username, user.password, grantedAuthorities)
+        return org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities)
     }
+
 }

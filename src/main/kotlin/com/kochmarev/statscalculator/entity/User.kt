@@ -4,19 +4,54 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "users")
-data class User (
+class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long,
+    private var id: Long? = null
 
     @Column(name = "username")
-    val username: String,
+    private var username: String? = null
 
     @Column(name = "password")
-    val password: String,
+    private var password: String? = null
 
     @ManyToMany
     @JoinTable(name = "user_roles", joinColumns = [JoinColumn(name = "user_id")],
             inverseJoinColumns = [JoinColumn(name = "role_id")])
-    val roles: Set<Role>
-)
+    private var roles: Set<Role?>? = null
+
+    @Transient
+    private var confirmPassword: String? = null
+
+    fun getUsername(): String? {
+        return username
+    }
+
+    fun setUsername(username : String) {
+        this.username = username
+    }
+
+    fun getPassword(): String? {
+        return password
+    }
+
+    fun setPassword(password : String) {
+        this.password = password
+    }
+
+    fun getRoles(): Set<Role?>? {
+        return roles
+    }
+
+    fun setRoles(roles : Set<Role?>) {
+        this.roles = roles
+    }
+
+    fun getConfirmPassword(): String? {
+        return confirmPassword
+    }
+
+    fun setConfirmPassword(confirmPassword: String) {
+        this.confirmPassword = confirmPassword
+    }
+}

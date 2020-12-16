@@ -4,14 +4,30 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "roles")
-data class Role (
+class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long,
+    var id: Long? = null
 
     @Column(name = "name")
-    val name: String,
+    private var name: String? = null
 
     @ManyToMany(mappedBy = "roles")
-    val users: Set<User>
-)
+    private var users: Set<User?>? = null
+
+    fun getName(): String? {
+        return name
+    }
+
+    fun setName(name: String?) {
+        this.name = name
+    }
+
+    fun getUsers(): Set<User?>? {
+        return users
+    }
+
+    fun setUsers(users: Set<User?>?) {
+        this.users = users
+    }
+}

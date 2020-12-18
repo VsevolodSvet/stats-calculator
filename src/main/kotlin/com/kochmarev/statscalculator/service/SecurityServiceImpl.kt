@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service
 class SecurityServiceImpl : SecurityService {
 
     @Autowired
-    private var authenticationManager: AuthenticationManager? = null
+    private lateinit var authenticationManager: AuthenticationManager
 
     @Autowired
-    private var userDetailsService: UserDetailsService? = null
+    private lateinit var userDetailsService: UserDetailsService
 
     override fun findLoggedInUsername(): String? {
         val userDetails = SecurityContextHolder.getContext().authentication.details
@@ -26,9 +26,9 @@ class SecurityServiceImpl : SecurityService {
     }
 
     override fun autoLogin(username: String, password: String) {
-        val userDetails = userDetailsService!!.loadUserByUsername(username)
+        val userDetails = userDetailsService.loadUserByUsername(username)
         val authenticationToken = UsernamePasswordAuthenticationToken(userDetails, password, userDetails.authorities)
-        authenticationManager!!.authenticate(authenticationToken)
+        authenticationManager.authenticate(authenticationToken)
         if (authenticationToken.isAuthenticated) {
             SecurityContextHolder.getContext().authentication = authenticationToken
             logger.debug(String.format("Successfully %s auto logged in", username))

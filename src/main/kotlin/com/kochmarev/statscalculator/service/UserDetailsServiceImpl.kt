@@ -16,12 +16,12 @@ import kotlin.jvm.Throws
 class UserDetailsServiceImpl : UserDetailsService {
 
     @Autowired
-    private var userDao: UserDao? = null
+    private lateinit var userDao: UserDao
 
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val user: User = userDao!!.findByUsername(username)
+        val user: User = userDao.findByUsername(username)
         val grantedAuthorities: MutableSet<GrantedAuthority> = HashSet()
         for (role: Role? in user.getRoles()!!) {
             grantedAuthorities.add(SimpleGrantedAuthority(role!!.getName()))

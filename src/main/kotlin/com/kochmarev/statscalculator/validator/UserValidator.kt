@@ -12,7 +12,7 @@ import org.springframework.validation.Validator
 class UserValidator : Validator {
 
     @Autowired
-    private var userService: UserService? = null
+    private lateinit var userService: UserService
 
     override fun supports(aClass: Class<*>): Boolean {
         return User::class.java == aClass
@@ -24,7 +24,7 @@ class UserValidator : Validator {
         if (user.getUsername().isNullOrBlank() || user.getUsername()!!.length > 32) {
             errors.rejectValue("username", "Size.userForm.username")
         }
-        if (userService!!.findByUsername(user.getUsername()) != null) {
+        if (userService.findByUsername(user.getUsername()) != null) {
             errors.rejectValue("username", "Duplicate.userForm.username")
         }
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "Required")

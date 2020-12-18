@@ -13,23 +13,23 @@ import java.util.*
 class UserServiceImpl : UserService {
 
     @Autowired
-    private var userDao: UserDao? = null
+    private lateinit var userDao: UserDao
 
     @Autowired
-    private var roleDao: RoleDao? = null
+    private lateinit var roleDao: RoleDao
 
     @Autowired
-    private val bCryptPasswordEncoder: BCryptPasswordEncoder? = null
+    private lateinit var bCryptPasswordEncoder: BCryptPasswordEncoder
 
     override fun save(user: User?) {
-        user?.setPassword(bCryptPasswordEncoder!!.encode(user.getPassword()))
+        user?.setPassword(bCryptPasswordEncoder.encode(user.getPassword()))
         val roles: MutableSet<Role?> = HashSet()
-        roles.add(roleDao!!.getOne(1L))
+        roles.add(roleDao.getOne(1L))
         user?.setRoles(roles)
-        userDao!!.save(user!!)
+        userDao.save(user!!)
     }
 
     override fun findByUsername(username: String?): User? {
-        return userDao!!.findByUsername(username.toString())
+        return userDao.findByUsername(username.toString())
     }
 }

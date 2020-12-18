@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestMethod
 class UserController {
 
     @Autowired
-    private var userService: UserService? = null
+    private lateinit var userService: UserService
 
     @Autowired
-    private var securityService: SecurityService? = null
+    private lateinit var securityService: SecurityService
 
     @Autowired
-    private var userValidator: UserValidator? = null
+    private lateinit var userValidator: UserValidator
 
     @RequestMapping(value = ["/registration"], method = [RequestMethod.GET])
     fun registration(model: Model): String {
@@ -32,12 +32,12 @@ class UserController {
 
     @RequestMapping(value = ["/registration"], method = [RequestMethod.POST])
     fun registration(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model?): String {
-        userValidator!!.validate(userForm, bindingResult)
+        userValidator.validate(userForm, bindingResult)
         if (bindingResult.hasErrors()) {
             return "registration"
         }
-        userService!!.save(userForm)
-        securityService!!.autoLogin(userForm.getUsername()!!, userForm.getConfirmPassword()!!)
+        userService.save(userForm)
+        securityService.autoLogin(userForm.getUsername()!!, userForm.getConfirmPassword()!!)
         return "redirect:/welcome"
     }
 

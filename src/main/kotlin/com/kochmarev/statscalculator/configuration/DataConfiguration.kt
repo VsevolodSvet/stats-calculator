@@ -9,6 +9,7 @@ import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import java.util.*
+import javax.persistence.EntityManagerFactory
 import javax.sql.DataSource
 
 
@@ -41,7 +42,6 @@ class DataConfiguration {
     @Bean
     fun dataSource(): DataSource? {
         val dataSource = DriverManagerDataSource()
-        dataSource.setDriverClassName(driverClassName.toString())
         dataSource.username = username
         dataSource.password = password
         dataSource.url = url
@@ -64,9 +64,8 @@ class DataConfiguration {
     @Bean
     fun transactionManager() : JpaTransactionManager {
         val jpaTransactionManager = JpaTransactionManager()
-        val jpaProps = Properties()
-        jpaProps.setProperty("entityManagerFactory", "entityManagerFactory")
-        jpaTransactionManager.setJpaProperties(jpaProps)
+        jpaTransactionManager.entityManagerFactory = entityManagerFactory().`object`
+        jpaTransactionManager.dataSource = dataSource()
         return jpaTransactionManager
     }
 }

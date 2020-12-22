@@ -21,8 +21,7 @@
 		<spring-boot.version>2.4.1</spring-boot.version>
 		<spring-security.version>5.0.8.RELEASE</spring-security.version>
 		<spring-data-jpa.version>2.4.2</spring-data-jpa.version>
-		<hibernate.version>5.0.1.Final</hibernate.version>
-		<hibernate-validator.version>5.2.1.Final</hibernate-validator.version>
+		<hibernate.version>5.2.1.Final</hibernate.version>
 		<mysql-connector.version>5.1.36</mysql-connector.version>
 		<commons-dbcp.version>1.4</commons-dbcp.version>
 		<jstl.version>1.2</jstl.version>
@@ -32,7 +31,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<mysql-connector.version>8.0.22</mysql-connector.version>
 		<tomcat-jdbc.version>10.0.0</tomcat-jdbc.version>
-		<jackson-module-kotlin.version>2.12.0</jackson-module-kotlin.version>
+		<jackson-module.version>2.11.3</jackson-module.version>
 		<lombok.version>1.18.16</lombok.version>
 		<kotlin.version>1.4.21</kotlin.version>
 	</properties>
@@ -61,6 +60,11 @@
 			<version>${spring-boot.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+			<version>${spring-boot.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>${spring.version}</version>
@@ -82,18 +86,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>${hibernate-validator.version}</version>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-jpa</artifactId>
-			<version>${spring-data-jpa.version}</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+			<version>${spring-data-jpa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -113,7 +122,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>
-			<version>${jackson-module-kotlin.version}</version>
+			<version>${jackson-module.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>${jackson-module.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>

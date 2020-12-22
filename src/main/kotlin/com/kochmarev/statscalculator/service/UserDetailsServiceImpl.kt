@@ -1,6 +1,6 @@
 package com.kochmarev.statscalculator.service
 
-import com.kochmarev.statscalculator.dao.UserDao
+import com.kochmarev.statscalculator.repository.UserRepository
 import com.kochmarev.statscalculator.entity.User
 import com.kochmarev.statscalculator.entity.Role
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,12 +16,12 @@ import kotlin.jvm.Throws
 class UserDetailsServiceImpl : UserDetailsService {
 
     @Autowired
-    private lateinit var userDao: UserDao
+    private lateinit var userRepository: UserRepository
 
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val user: User = userDao.findByUsername(username)
+        val user: User = userRepository.findByUsername(username)
         val grantedAuthorities: MutableSet<GrantedAuthority> = HashSet()
         for (role: Role? in user.getRoles()!!) {
             grantedAuthorities.add(SimpleGrantedAuthority(role!!.getName()))

@@ -1,7 +1,7 @@
 package com.kochmarev.statscalculator.service
 
-import com.kochmarev.statscalculator.dao.RoleDao
-import com.kochmarev.statscalculator.dao.UserDao
+import com.kochmarev.statscalculator.repository.RoleRepository
+import com.kochmarev.statscalculator.repository.UserRepository
 import com.kochmarev.statscalculator.entity.Role
 import com.kochmarev.statscalculator.entity.User
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,10 +13,10 @@ import java.util.*
 class UserServiceImpl : UserService {
 
     @Autowired
-    private lateinit var userDao: UserDao
+    private lateinit var userRepository: UserRepository
 
     @Autowired
-    private lateinit var roleDao: RoleDao
+    private lateinit var roleRepository: RoleRepository
 
     @Autowired
     private lateinit var bCryptPasswordEncoder: BCryptPasswordEncoder
@@ -24,12 +24,12 @@ class UserServiceImpl : UserService {
     override fun save(user: User?) {
         user?.setPassword(bCryptPasswordEncoder.encode(user.getPassword()))
         val roles: MutableSet<Role?> = HashSet()
-        roles.add(roleDao.getOne(1L))
+        roles.add(roleRepository.findById(1L).get())
         user?.setRoles(roles)
-        userDao.save(user!!)
+        userRepository.save(user!!)
     }
 
     override fun findByUsername(username: String?): User? {
-        return userDao.findByUsername(username.toString())
+        return userRepository.findByUsername(username.toString())
     }
 }

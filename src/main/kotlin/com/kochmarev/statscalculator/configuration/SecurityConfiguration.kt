@@ -19,6 +19,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.authorizeRequests()
+            .antMatchers("/login", "/registration").permitAll()
             .antMatchers("/", "welcome").hasAnyRole("USER", "ADMIN")
             .antMatchers("/admin/**").hasRole("ADMIN").anyRequest()
             .authenticated().and()

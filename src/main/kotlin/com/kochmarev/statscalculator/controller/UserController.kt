@@ -1,4 +1,4 @@
-package com.kochmarev.statscalculator.controllers
+package com.kochmarev.statscalculator.controller
 
 import com.kochmarev.statscalculator.entity.User
 import com.kochmarev.statscalculator.service.SecurityService
@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
 
 @Controller
 class UserController {
@@ -24,14 +24,14 @@ class UserController {
     @Autowired
     private lateinit var userValidator: UserValidator
 
-    @RequestMapping(value = ["/registration"], method = [RequestMethod.GET])
+    @GetMapping("/registration")
     fun registration(model: Model): String {
         model.addAttribute("userForm", User())
         return "registration"
     }
 
-    @RequestMapping(value = ["/registration"], method = [RequestMethod.POST])
-    fun registration(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model?): String {
+    @PostMapping("/registration")
+    fun registration(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model): String {
         userValidator.validate(userForm, bindingResult)
         if (bindingResult.hasErrors()) {
             return "registration"
@@ -41,7 +41,7 @@ class UserController {
         return "redirect:/welcome"
     }
 
-    @RequestMapping(value = ["/login"], method = [RequestMethod.GET])
+    @GetMapping("/login")
     fun login(model: Model, error: String?, logout: String?): String {
         if (error != null) {
             model.addAttribute("error", "Username or password is incorrect.")
@@ -52,13 +52,13 @@ class UserController {
         return "login"
     }
 
-    @RequestMapping(value = ["/", "/welcome"], method = [RequestMethod.GET])
-    fun welcome(model: Model?): String {
+    @GetMapping("/", "/welcome")
+    fun welcome(model: Model): String {
         return "welcome"
     }
 
-    @RequestMapping(value = ["/admin"], method = [RequestMethod.GET])
-    fun admin(model: Model?): String {
+    @GetMapping("/admin")
+    fun admin(model: Model): String {
         return "admin"
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
 
 @Controller
 class UserController {
@@ -24,15 +26,15 @@ class UserController {
     @Autowired
     private lateinit var userValidator: UserValidator
 
-    @GetMapping("/registration")
+    @RequestMapping(value = ["/registration"], method = [RequestMethod.GET])
     fun registration(model: Model): String {
         model.addAttribute("userForm", User())
         return "registration"
     }
 
-    @PostMapping("/registration")
-    fun registration(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model): String {
-        userValidator.validate(userForm, bindingResult)
+    @RequestMapping(value = ["/registration"], method = [RequestMethod.POST])
+    fun registration(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model?): String {
+        userValidator!!.validate(userForm, bindingResult)
         if (bindingResult.hasErrors()) {
             return "registration"
         }
@@ -41,7 +43,7 @@ class UserController {
         return "redirect:/welcome"
     }
 
-    @GetMapping("/login")
+    @RequestMapping(value = ["/login"], method = [RequestMethod.GET])
     fun login(model: Model, error: String?, logout: String?): String {
         if (error != null) {
             model.addAttribute("error", "Username or password is incorrect.")
@@ -52,13 +54,13 @@ class UserController {
         return "login"
     }
 
-    @GetMapping("/", "/welcome")
-    fun welcome(model: Model): String {
+    @RequestMapping(value = ["/", "/welcome"], method = [RequestMethod.GET])
+    fun welcome(model: Model?): String {
         return "welcome"
     }
 
-    @GetMapping("/admin")
-    fun admin(model: Model): String {
+    @RequestMapping(value = ["/admin"], method = [RequestMethod.GET])
+    fun admin(model: Model?): String {
         return "admin"
     }
 }

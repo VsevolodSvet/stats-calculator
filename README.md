@@ -7,8 +7,12 @@ using several different tests.<br>
 * [About S.P.E.C.I.A.L.](http://specialrpg.wikidot.com)
 
 ### UML
-[Use case diagram](readme_res/stats_use_case.png)
+[Use case diagram](src/main/resources/readme_res/stats_use_case.png)<br>
+[Database structure](src/main/resources/readme_res/database_structure.png)
 
 ### VCS
 * [Main branch](https://github.com/VsevolodSvet/stats-calculator/tree/master)
 * [Develop branch (unstable)](https://github.com/VsevolodSvet/stats-calculator/tree/develop)
+
+### Other
+[Swagger api (attempt to structure)](https://app.swaggerhub.com/apis/VsevolodSvet/stats-calculator/0.0.1)

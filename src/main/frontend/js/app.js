@@ -3,7 +3,6 @@
 // tag::vars[]
 const React = require('react');
 const ReactDOM = require('react-dom');
-const client = require('./client'); // mbmb
 // end::vars[]
 
 // tag::app[]
@@ -14,19 +13,25 @@ class App extends React.Component {
 		this.state = {employees: []};
 	}
 
-	componentDidMount() {
-		client({method: 'GET', path: '/api/employees'}).done(response => {
-			this.setState({employees: response.entity._embedded.employees});
-		});
-	}
-
 	render() {
 		return (
-			<EmployeeList employees={this.state.employees}/>
+			<h1>HELLO</h1>
 		)
 	}
 }
 // end::app[]
+
+// tag::user[]
+class User extends React.Component {
+
+	render() {
+	    let current_user = this.props.user.username + this.props.user.roles.contains("ROLE_ADMIN") ? ' (admin)' : '';
+		return (
+			<div>{current_user}</div>
+		)
+	}
+}
+// end::user[]
 
 // tag::render[]
 ReactDOM.render(

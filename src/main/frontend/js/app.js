@@ -8,11 +8,6 @@ const ReactDOM = require('react-dom');
 // tag::app[]
 class App extends React.Component {
 
-	constructor(props) {
-		super(props);
-		this.state = {employees: []};
-	}
-
 	render() {
 		return (
 			<h1>HELLO</h1>

@@ -12,6 +12,9 @@ class User {
     @Column(name = "username")
     private var username: String? = null
 
+    @Column(name = "email")
+    private var email: String? = null
+
     @Column(name = "password")
     private var password: String? = null
 
@@ -29,6 +32,14 @@ class User {
 
     fun setUsername(username : String) {
         this.username = username
+    }
+
+    fun getEmail(): String? {
+        return email
+    }
+
+    fun setEmail(email : String) {
+        this.email = email
     }
 
     fun getPassword(): String? {

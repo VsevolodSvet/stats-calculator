@@ -35,23 +35,17 @@ class MvcConfiguration : WebMvcConfigurer {
 
     class ReactResourceResolver : ResourceResolver {
         companion object {
-            // this is the same directory you are using in package.json
-            // "build-spring": "react-scripts build &&  mv build static && mv static ../src/main/resources",
-            // example REACT_DIR/index.html
-            private const val REACT_DIR = "/static/"
-
-            // this is directory inside REACT_DIR for react static files
-            // example REACT_DIR/REACT_STATIC_DIR/js/
-            // example REACT_DIR/REACT_STATIC_DIR/css/
-            private const val REACT_STATIC_DIR = "static"
+            private const val REACT_DIR = "/frontend/"
+            private const val REACT_STATIC_DIR = "frontend"
         }
 
-        private val index: Resource = ClassPathResource(REACT_DIR + "index.html")
+        private val index: Resource = ClassPathResource(REACT_DIR + "templates/index.html")
+        /*
         private val rootStaticFiles: List<String> = listOf(
             "favicon.io",
             "asset-manifest.json", "manifest.json", "service-worker.js"
         )
-
+         */
         override fun resolveResource(
             request: HttpServletRequest?, requestPath: String,
             locations: List<Resource>, chain: ResourceResolverChain
@@ -70,11 +64,12 @@ class MvcConfiguration : WebMvcConfigurer {
 
         private fun resolve(requestPath: String?, locations: List<Resource>): Resource? {
             if (requestPath == null) return null
-            return if (rootStaticFiles.contains(requestPath)
+            /* return if (rootStaticFiles.contains(requestPath)
                 || requestPath.startsWith(REACT_STATIC_DIR)
             ) {
                 ClassPathResource(REACT_DIR + requestPath)
-            } else index
+            } else index */
+            return index
         }
     }
 

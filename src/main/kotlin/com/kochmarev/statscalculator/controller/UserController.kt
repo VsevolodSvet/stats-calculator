@@ -24,21 +24,21 @@ class UserController {
     @Autowired
     private lateinit var userValidator: UserValidator
 
-    @RequestMapping(value = ["/registration"], method = [RequestMethod.GET])
-    fun registration(model: Model): String {
+    @RequestMapping(value = ["/register"], method = [RequestMethod.GET])
+    fun register(model: Model): String {
         model.addAttribute("userForm", User())
-        return "registration"
+        return "register"
     }
 
-    @RequestMapping(value = ["/registration"], method = [RequestMethod.POST])
-    fun registration(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model?): String {
+    @RequestMapping(value = ["/register"], method = [RequestMethod.POST])
+    fun register(@ModelAttribute("userForm") userForm: User, bindingResult: BindingResult, model: Model?): String {
         userValidator.validate(userForm, bindingResult)
         if (bindingResult.hasErrors()) {
-            return "registration"
+            return "register"
         }
         userService.save(userForm)
         securityService.autoLogin(userForm.getUsername()!!, userForm.getConfirmPassword()!!)
-        return "redirect:/welcome"
+        return "redirect:/mystats"
     }
 
     @RequestMapping(value = ["/login"], method = [RequestMethod.GET])
@@ -52,9 +52,9 @@ class UserController {
         return "login"
     }
 
-    @RequestMapping(value = ["/", "/welcome"], method = [RequestMethod.GET])
-    fun welcome(model: Model?): String {
-        return "welcome"
+    @RequestMapping(value = ["/", "/mystats"], method = [RequestMethod.GET])
+    fun mystats(model: Model?): String {
+        return "mystats"
     }
 
     @RequestMapping(value = ["/admin"], method = [RequestMethod.GET])

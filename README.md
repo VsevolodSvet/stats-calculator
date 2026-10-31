@@ -22,6 +22,170 @@ The **Practice range** also includes visual-detail matching, reasoning puzzles,
 and target-selection coordination with separate saved summaries.
 Optional username/password accounts now provide a **My results** screen for
 private assessment and practice history.
+**Separate stat quizzes** add seven individual assessments and a signed-in
+character sheet using the latest completed quiz for each stat.
+
+### Separate stat quizzes and character sheet
+Open **http://localhost:8080/#/stat-quizzes**. The original 21-question assessment
+and standalone practice range remain available and their old results are unchanged.
+
+| Stat | Version 1 content |
+|---|---|
+| Strength | Eight untimed original fitness self-report questions |
+| Perception | Six visual-detail tasks, 75 seconds total, then four untimed questions |
+| Endurance | Eight untimed original activity/endurance self-report questions |
+| Charisma | Six untimed communication scenarios; optional private photo screen is separate and never scored |
+| Intelligence | Ten reasoning/general-knowledge tasks, 180 seconds total, then three reflection questions and two unscored work/education context questions |
+| Agility | Twelve nine-cell coordination rounds, 45 seconds total, then four untimed questions |
+| Luck | Two chance mini-games: three coin guesses and three die guesses, then four untimed perceived-opportunity questions |
+
+Fitness content is original and informed by
+[CDC adult physical activity guidance](https://www.cdc.gov/physical-activity-basics/guidelines/adults.html),
+not copied from SportWiki or presented as a validated questionnaire. No physical
+exercise, maximum lifting, running or breath-holding is requested. These adult
+self-reports cannot measure physiological strength/endurance or prescribe training.
+All quizzes remain playful, unvalidated summaries, not medical, personality or
+IQ assessments. Fixed tasks repeat on retakes; language, practice, device, disability
+and accessibility tools affect results. No IQ, percentile or population norms exist.
+
+Taskless quizzes use scored-question responses only. Other quizzes use **70% task
+outcome and 30% reflection**. Each scored option has 0-4 points; reflection
+percentage is `round(25 * sum / scoredQuestionCount)`. Task percentage is
+`100 * correct / total`, including unanswered tasks in the denominator. The final
+game score is `1 + round(9 * weightedPercentage / 100)`. Work/education context
+has a prefer-not-to-say option, never adds points, and is not saved. Charisma is
+based on chosen communication scenarios, not an inference from appearance.
+Luck draws use server-side `SecureRandom` after each choice; coin/die matches have
+probabilities 1/2 and 1/6 respectively. Its score deliberately includes chance,
+does not predict real-world outcomes and carries no stakes or rewards.
+
+Starting a quiz creates a session-bound attempt. Timed sections have an absolute
+**server-enforced deadline**: changing the browser clock, hiding the page or switching
+tabs does not pause it. Task answers are recorded sequentially; late answers do
+not earn points. Network delay counts, so timing is not reaction time or suitable
+for cross-device comparisons. General questions follow without a task timer.
+Attempts still expire with the 30-minute idle session. One active stat attempt
+is kept per browser session; a new attempt replaces the previous one, including
+across tabs. Browser drafts are not restored on reload. Signing into a different
+account during an attempt is rejected; a lost session requires starting again.
+Retrying the last task choice cannot reroll a chance draw or count twice.
+Retrying a successful save in the same attempt returns the same saved result.
+
+Only versioned summaries are persisted: score, reflection percentage, task
+correct/attempted/total counts, timestamp and optional ownership. Individual
+answers and work/education selections are not persisted. A current task and its
+last selection are held temporarily in the server session; the last selection
+is cleared on save. Anonymous result links are unlisted; signed-in results are
+owner-only and included in **My results**.
+
+Open **http://localhost:8080/#/character-sheet** while signed in. Each stat shows
+the latest saved **individual stat quiz**, with timestamp/UUID ordering for ties;
+untested stats show **Untested**, not zero or a guessed score. Retakes update
+only that stat while preserving older history. Anonymous, legacy combined
+assessments and standalone practice results are not auto-claimed or combined.
+
+### Optional private photo and local quality feedback
+Open **http://localhost:8080/#/photo** while signed in, or select **Private photo**
+in account navigation. The Charisma briefing also links to this separate feature.
+Choose your own JPEG/PNG (or one you have permission to store), preview it,
+explicitly consent, and select **Save private photo**. Selection alone does not
+upload anything. One photo is stored per account in local PostgreSQL, replacing
+the previous active photo. It persists in the existing Compose database volume.
+There is no public/unlisted photo URL. Saving does not trigger a third-party
+request, model download, face detection, identification, or stat-score change.
+Optional iLook analysis requires a separate action and consent, described below.
+
+The server decodes/re-encodes uploads into RGB PNG, strips metadata and trailing
+content, flattens transparency onto white, and resizes to at most 1200 pixels per
+side. Input is limited to **5 MiB**, **6000 pixels per side** and **12 megapixels**,
+with a minimum 32 pixels per side. SVG, GIF and other formats are rejected even
+if renamed. Image orientation from EXIF is not applied on the server: export a
+correctly rotated image from your photo editor if the saved preview is rotated.
+Original filenames and original image bytes are not retained.
+
+Feedback uses whole-image luminance, near-black/white pixel proportion, Laplacian
+edge variance and resolution. These are uncalibrated technical heuristics, not
+face-specific measurements: a plain background can look like low detail, and
+lighting/skin tone/background can affect brightness. Results never characterize
+the person. No face location, head pose, face count or charisma inference is made.
+
+**Delete stored photo** removes the active database row; replacement/deletion
+cannot erase copies in existing PostgreSQL backups, WAL or snapshots. The UI
+states this explicitly. Images are not application-level encrypted; secure the
+local computer/database and use HTTPS outside local development. Upload/read/
+delete operations require the signed-in owner; writes require CSRF and all photo
+requests include the expected account to reject cross-tab account changes.
+Photo bytes are not intentionally written to application logs or temporary files.
+Public deployment still needs upload rate/concurrency limits and a backup/retention
+policy; this remains a local prototype, not a public image-hosting service.
+
+### External face API research (2026-10-31)
+iLook is integrated but **disabled by default** until an operator-issued API key
+is configured. A private upload is **not** consent to external analysis.
+
+| Candidate | Verified capability | Free-use/privacy conclusion |
+|---|---|---|
+| [iLook](https://www.ilook.fit/api/docs) | Versioned subjective appearance scores, explanations, symmetry and focused tools including PSL-style feedback | [Auth docs](https://www.ilook.fit/auth.md) specify 100 requests per issued key per UTC day; keys are manually provisioned. [Pricing](https://www.ilook.fit/pricing.md) lists API access as free within key limits, separately from paid subscriptions. API images are described as transient, but downstream providers, processing regions, training use and precise deletion timing remain unclear. |
+| [Face++](https://www.faceplusplus.com/beauty/) | Advertises a beauty attribute alongside face quality/landmarks | Could not verify a current free quota or whether beauty is included from accessible documentation. Its [privacy policy](https://www.faceplusplus.com/privacy-policy/) describes deletion/anonymization "as soon as possible", not a fixed TTL, China/Canada processing, and network logs retained at least six months. Not enabled or endorsed. |
+| [Luxand.Cloud](https://www.luxand.cloud/pricing) | Offers face APIs | Pricing page metadata advertises a 14-day trial, not an ongoing free tier. A suitable beauty-rating API/terms were not verified. |
+| [AWS Rekognition](https://docs.aws.amazon.com/rekognition/latest/APIReference/API_DetectFaces.html) | Face brightness/sharpness, bounding box and pose | No beauty rating. [Usage pricing](https://aws.amazon.com/rekognition/pricing/) applies; introductory credits are not permanent free access. Review the [AI-services opt-out policy](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_ai-opt-out.html) before any images are sent. |
+| [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector/web_js) | Local face boxes and landmarks | A possible future self-hosted alternative to cloud calls, not a face attractiveness rating. Not installed in this milestone; review model/code licenses before shipping. |
+
+iLook was selected for an optional integration, not as an endorsement of
+"blackpill" claims. Appearance scores are subjective and model-dependent, not scientific measurements
+of attractiveness, genetics, character or life prospects. Do not mix them into
+Perception/Charisma or present them as objective conclusions about a person.
+
+### Optional iLook feedback for Charisma
+Obtain a beta key directly from the iLook operator; there is no public key signup.
+Before enabling it for other users, clarify multi-user application permission and
+the unresolved data-processing details in its [privacy policy](https://www.ilook.fit/privacy)
+and [terms](https://www.ilook.fit/terms). No live provider analysis has been verified
+without a key; automated checks use a local mock provider, never personal photos.
+
+Set `ILOOK_API_KEY` **only on the server**, then restart the Java application or
+recreate the Compose app service. For PowerShell, read it without putting its
+value in command history:
+
+```powershell
+$credential = Get-Credential -UserName 'ilook' -Message 'Enter the iLook API key in the password field'
+$env:ILOOK_API_KEY = $credential.GetNetworkCredential().Password
+try {
+    # DB_PASSWORD must already be set to the existing database password.
+    docker compose up -d --no-deps app
+} finally {
+    Remove-Item Env:ILOOK_API_KEY
+    Remove-Variable credential
+}
+```
+
+Do not commit keys, paste them into chat, pass them as command-line arguments,
+or put them in browser code/storage. Compose passes the variable to the server
+container; users with Docker/host administrator access can inspect its environment.
+To disable the integration, unset the variable and recreate the app service.
+
+From the Charisma briefing or **Private photo**, save a photo, confirm the
+pictured person is **18+** and you have authorization, separately consent to
+iLook processing, then select **Analyze saved photo with iLook**. Neither saving,
+loading the screen nor taking the quiz sends images externally. The server sends
+only that exact saved revision's normalized PNG as multipart data to the fixed
+`https://www.ilook.fit/api/v1/score` endpoint, with `adult_and_authorized=true`.
+No username, original filename, session cookie or questionnaire answers are sent.
+The provider's decimal **5 MB** image limit is enforced separately from local
+storage's 5 MiB limit.
+
+The report displays an overall subjective appearance score, five subscores with
+explanations, summary, confidence and model/rubric/analysis identifiers. It is
+kept only in the page for this visit, not stored in PostgreSQL/history or included
+in the Charisma calculation. Replacing/deleting the photo or navigating away
+clears the displayed report. Provider text is rendered as text, not HTML.
+Requests have 3-second connect/45-second read timeouts (the browser allows
+60 seconds for this action), bounded response size and at most two
+concurrent provider calls per server. Quota exhaustion, photo rejection,
+configuration errors and malformed reports are surfaced without exposing provider
+response bodies. There are no automatic retries; a failed/aborted request may
+still consume provider quota. Distributed/per-user abuse controls and a complete
+data-processing review remain prerequisites for public deployment.
 
 ### Browser experience
 Choose an assessment, read its instructions, and answer each question. Previous
@@ -155,6 +319,7 @@ java -jar .\target\stats-calculator-0.0.1-SNAPSHOT.jar
 | `DB_PORT` | Compose host DB port, default `5432`; if changed for local Java execution, also change `DB_URL`. |
 | `SERVER_PORT` | Spring Boot HTTP port, default `8080`. |
 | `SESSION_COOKIE_SECURE` | `false` for local HTTP; must be `true` when deployed with HTTPS. |
+| `ILOOK_API_KEY` | Empty/disabled by default. Server-only, operator-issued iLook key for optional adult photo feedback; never changes stat scores. |
 
 Compose binds host ports to loopback. For example, if port 5432 is occupied, set
 `DB_PORT` to `55432` and `DB_URL` to
@@ -323,7 +488,7 @@ level (in addition to API validation).
 | `POST /api/v1/auth/register` | JSON `{username, password}`; `201` on success, `400` for invalid fields, `409` for unavailable username. Does not sign in automatically. |
 | `POST /api/v1/auth/login` | Form-encoded `username` and `password`, plus CSRF header; `204` on success or generic `401` on failure. Keep the session cookie. |
 | `POST /api/v1/auth/logout` | CSRF-protected session invalidation; `204`. |
-| `GET /api/v1/me/results?page=0&size=20` | Authenticated only; mixed newest-first history `{items, page, size, hasNext}`. Size must be 1-50; page non-negative. Each item has `id`, `kind` (`SPECIAL`/`PRACTICE`), `title`, `version`, `createdAt`, and optional practice `correct`/`total`. |
+| `GET /api/v1/me/results?page=0&size=20` | Authenticated only; mixed newest-first history `{items, page, size, hasNext}`. Size must be 1-50; page non-negative. Each item has `id`, `kind` (`SPECIAL`/`PRACTICE`/`STAT`), `title`, `version`, `createdAt`, and optional task `correct`/`total`. |
 
 Result responses now include `privateResult` and a matching privacy notice.
 Ownership always comes from the authenticated session, never a body field.
@@ -341,6 +506,46 @@ other than their owner return `404`. Basic authentication is disabled. Sensitive
 responses use no-store caching headers, and no cross-origin permission is
 configured. The privacy change applies to new signed-in saves only: Flyway V5
 adds nullable owner references without rewriting old results or their links.
+
+### Individual stat quiz API
+All writes use the existing CSRF/session flow. Definitions are immutable and
+seeded by V7 after the additive V6 schema; publish future changes as new versions
+in new migrations rather than editing applied content.
+
+| Method and path | Contract |
+|---|---|
+| `GET /api/v1/stat-quizzes` | Seven ordered quiz details, untimed questions/options and timing/scoring notices; no answer keys |
+| `GET /api/v1/stat-quizzes/{stat}/versions/{version}` | Versioned briefing and untimed questions; stat IDs are lowercase attribute names |
+| `POST /api/v1/stat-quizzes/{stat}/versions/{version}/attempts` | No body. Start/replace the current session attempt; supports `X-Result-Privacy` and `X-Result-Account` expectations |
+| `GET /api/v1/stat-quiz-attempts/{uuid}` | Current task state, `serverNow`, absolute `deadline` (or null), answered/total, optional chance feedback |
+| `POST /api/v1/stat-quiz-attempts/{uuid}/answers` | JSON `{questionId, optionId}` for the current task; returns next state. Only grid tasks expose their target |
+| `POST /api/v1/stat-quiz-attempts/{uuid}/result` | JSON `{answers: [{questionId, optionId}]}` for all untimed questions; saves summary only after task completion/expiry; `201` and result location |
+| `GET /api/v1/stat-quiz-results/{uuid}` | Immutable summary with `privateResult`; private reads require the owner |
+| `GET /api/v1/me/character-sheet` | Authenticated only; seven entries with latest `resultId`, `score`, `createdAt` or null for untested stats, and current `quizVersion` for retakes |
+
+Malformed answers return `400`; out-of-order task choices, changed anonymous
+sign-in state and premature saves return `409`. A replaced/expired attempt
+returns `404`; an owned attempt whose account changes returns `401`. Ownerless
+and account-owned attempts cannot change ownership on save. The deadline is
+checked when a task request reaches the server, not from a submitted duration.
+
+### Private photo API
+All routes require authentication and the `X-Result-Account` username header;
+account mismatches return `409`. Authentication is mandatory before a photo is
+read or changed. Reads use no-store caching and images are served as PNG.
+
+| Method and path | Contract |
+|---|---|
+| `GET /api/v1/me/photo` | `{stored, revision, updatedAt, analysis}`; analysis includes dimensions, whole-image brightness/detail and feedback, or null when absent |
+| `GET /api/v1/me/photo/image` | Owner's PNG bytes or `404`. Send `Accept: image/png`; no public UUID/filename lookup |
+| `POST /api/v1/me/photo` | Raw JPEG/PNG body, matching Content-Type, CSRF, `X-Photo-Consent: true`, expected-account header; validate/normalize and upsert the owner's photo |
+| `DELETE /api/v1/me/photo` | CSRF and expected-account header; idempotently remove owner's active photo, `204` |
+| `GET /api/v1/me/photo/ilook` | Owner-only `{available}`; no provider call or key disclosure |
+| `POST /api/v1/me/photo/ilook` | JSON `{revision, externalConsent: true, adultAndAuthorized: true}`, CSRF and expected-account header; analyze only the owner's matching saved revision and return an ephemeral report |
+
+Malformed/unsupported decoded images return `400`; unsupported HTTP content types
+return `415`; uploads over 5 MiB return `413`. A failed validation does not replace
+the old photo. V8 adds this private table without changing existing result data.
 
 ### UML
 [Use case diagram](readme_res/stats_use_case.png)

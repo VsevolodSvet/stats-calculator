@@ -171,6 +171,10 @@ meter::-moz-meter-bar { background: #b5d59a; }
 .history-list > li { padding: 20px 0; border-bottom: 1px solid var(--line); }
 .history-list p { margin: 8px 0; }
 .history-title { font-size: 1.05rem; }
+.profile-photo { display: block; max-width: 100%; max-height: 420px; object-fit: contain; margin: 24px auto; border: 1px solid var(--line); }
+.photo-form { margin: 24px 0; }
+.photo-form > label:first-child { display: block; margin-bottom: 12px; }
+.photo-form > input { max-width: 100%; }
 
 @media (max-width: 760px) {
     body { padding: 12px 10px; }

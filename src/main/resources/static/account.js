@@ -19,6 +19,8 @@ export function createAccount(ui) {
         if (session.authenticated) {
             nav.append(element("span", `SIGNED IN / ${session.username}`, "metadata"),
                 link("My results", "#/my-results", "nav-link"),
+                link("Character sheet", "#/character-sheet", "nav-link"),
+                link("Private photo", "#/photo", "nav-link"),
                 button("Sign out", async () => {
                     if (!canLeave()) return;
                     try {
@@ -33,6 +35,7 @@ export function createAccount(ui) {
         } else {
             nav.append(link("Sign in", "#/login", "nav-link"),
                 link("Create account", "#/register", "nav-link"),
+                link("Character sheet", "#/character-sheet", "nav-link"),
                 link("My results", "#/my-results", "nav-link"));
         }
     }
@@ -158,7 +161,8 @@ export function createAccount(ui) {
 
     function historyRow(result) {
         const row = element("li");
-        const hash = result.kind === "SPECIAL" ? `#/results/${result.id}` : `#/practice/results/${result.id}`;
+        const resultPaths = { SPECIAL: "results", PRACTICE: "practice/results", STAT: "stat-quizzes/results" };
+        const hash = `#/${resultPaths[result.kind]}/${result.id}`;
         row.append(element("p", `${result.kind} / V${result.version} / ${new Date(result.createdAt).toLocaleString()}`, "metadata"),
             link(result.title, hash, "history-title"));
         if (result.kind === "PRACTICE") row.append(element("p", `${result.correct} of ${result.total} correct`, "metadata"));
@@ -209,5 +213,6 @@ export function createAccount(ui) {
         return false;
     }
 
-    return { refresh, handle, privacy, expectation, signInPrompt, identity: () => session?.username || "" };
+    return { refresh, handle, privacy, expectation, signInPrompt, identity: () => session?.username || "",
+        authenticated: () => Boolean(session?.authenticated) };
 }

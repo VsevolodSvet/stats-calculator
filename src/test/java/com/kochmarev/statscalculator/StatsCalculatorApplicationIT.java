@@ -304,7 +304,7 @@ class StatsCalculatorApplicationIT {
                 SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'
                 """, String.class)).containsExactlyInAnyOrder(
                 "flyway_schema_history", "assessment_versions", "questions", "answer_options", "results",
-                "practice_activities", "practice_results", "accounts");
+                "practice_activities", "practice_results", "accounts", "stat_quizzes", "stat_quiz_results", "profile_photos");
     }
 
     private SubmitResult request(int optionValue) {

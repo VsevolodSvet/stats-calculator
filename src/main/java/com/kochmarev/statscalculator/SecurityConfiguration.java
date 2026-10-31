@@ -35,7 +35,9 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/**").permitAll()
                         .requestMatchers(HttpMethod.HEAD, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/results", "/api/v1/practice/results",
-                                "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                                "/api/v1/auth/register", "/api/v1/auth/login",
+                                "/api/v1/stat-quizzes/*/versions/*/attempts",
+                                "/api/v1/stat-quiz-attempts/*/answers", "/api/v1/stat-quiz-attempts/*/result").permitAll()
                         .anyRequest().denyAll())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(login -> login.loginProcessingUrl("/api/v1/auth/login")

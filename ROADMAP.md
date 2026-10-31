@@ -316,9 +316,79 @@ accounts/results persist in PostgreSQL. A restart requires signing in again.
 Review briefing privacy text at presentation time without changing immutable
 question/scoring definitions or old results.
 
-## 12. Next implementation session
+## 12. Separate stat quizzes and character sheet
 
-Review the login and My results experience locally. Choose a follow-up milestone
-from section 9 before expanding scope; recovery/deletion, aggregation, and
-public deployment require their own decisions. Keep `FalloutCalculator`
-unchanged unless a separate task explicitly authorizes changes there.
+Confirmed product decisions:
+- Seven independent quizzes; the existing combined assessment and practice range remain unchanged.
+- Strength/Endurance use original fitness self-reports informed by public guidance,
+  not copied questionnaires or physiological/medical scores.
+- Charisma uses questions/social scenarios. Photo presentation is optional future
+  work after provider privacy review, never a source of personality/charisma scores.
+- Perception and Intelligence use timed original tasks followed by untimed questions.
+  Education/work context is optional, unscored and not persisted; there is no IQ conversion.
+- Agility combines timed keyboard/touch/pointer coordination with everyday questions,
+  with device/network/accessibility limitations made explicit.
+- Luck combines perceived-opportunity questions with server-drawn coin/die games;
+  outcomes are openly random and cannot predict real-world luck.
+- A persistent character sheet requires sign-in. Use the latest individual quiz
+  per stat, show untested values explicitly, retain all old history. Anonymous
+  users can still take individual quizzes and receive unlisted result links.
+
+Implementation:
+- [x] Add immutable versioned definitions and summary storage through additive migrations.
+- [x] Add server-timed session attempts, sequential answers and server-side chance draws.
+- [x] Make task-choice/save retries idempotent and guard original account/privacy.
+- [x] Add seven quiz briefings, task/question flows, results and character-sheet routes.
+- [x] Include private stat results in mixed personal history without changing legacy scores.
+- [x] Cover scoring bounds, exact timing boundaries, privacy, history/latest selection,
+  validation, failures and original browser compatibility.
+- [x] Add an optional private local-server photo screen, explicit storage consent,
+  replacement/deletion, bounded metadata-stripped image storage and whole-image
+  quality heuristics, separate from all stat scoring.
+- [x] Add an optional iLook integration, disabled without a server-side key,
+  with separate external-processing consent and adult authorization. Keep
+  appearance feedback separate from all stat scoring and persistent history.
+- [ ] Obtain an operator-issued iLook key, confirm multi-user application use,
+  clarify downstream processing/retention/training/regions and verify a live call
+  with a separately authorized adult image before enabling for other users.
+- [ ] Validate/revise original content with domain experts before making any
+  assessment-validity claims; review accessibility alternatives to timed tasks.
+
+V1 task limits are Perception 75 seconds, Intelligence 180 seconds and Agility
+45 seconds. These are game design choices, not validated assessment thresholds.
+Mixed quizzes use 70% task outcomes and 30% reflection; taskless quizzes use 100%
+reflection. Repeated fixed content involves learning. Published definitions
+and scoring are immutable; updates require new versions/migrations.
+
+## 13. Private local photos
+
+The user selected server-side storage under the signed-in account rather than
+browser-only storage. V8 adds one normalized PNG per account in PostgreSQL.
+An authenticated, CSRF-protected photo screen supports explicit consent, preview,
+save/replace, delete, local brightness/detail/resolution feedback, and expected-
+account checks. iLook analysis is a separate opt-in action, disabled without a key;
+local storage never automatically sends images externally.
+Feedback is whole-image only and never updates S.P.E.C.I.A.L. Photos persist in
+the existing local database volume; deletion only removes the active row and
+cannot purge existing backups/WAL. Upload sizes, decoded dimensions and normalized
+output are bounded. Local-only storage is not a public-deployment security claim.
+
+Current provider research and source links are in README. Face++ advertises beauty
+attributes, but a current free quota and fixed photo-retention period could not
+be verified. Luxand advertises a trial rather than permanent free use. Rekognition
+offers photo quality, not beauty scores; MediaPipe is a possible future local
+landmark detector. Do not present appearance scores or "blackpill" claims as
+scientific measures of worth, character or prospects.
+
+iLook publishes a multipart API and 100 requests/key/UTC-day allowance with
+manually issued beta keys. The integration shows versioned subjective appearance
+feedback transiently in the photo screen, requires separate adult/third-party
+consent and the exact saved revision, and does not change Charisma. Credentials
+stay server-side. No key or live provider image request was used during implementation.
+
+## 14. Next implementation session
+
+Review the individual quiz experience and question wording locally. Provider
+key provisioning/data-processing review, recovery/deletion, accessible alternative assessment
+versions and public deployment remain separate follow-up decisions.
+Keep `FalloutCalculator` unchanged unless explicitly authorized.

@@ -37,12 +37,17 @@ public class PersonalResultsController {
                 SELECT r.id, 'PRACTICE' AS kind, a.title, a.version, r.created_at, r.correct, r.total
                 FROM practice_results r JOIN practice_activities a ON r.activity_version_id = a.id
                 WHERE r.owner_id = ?
+                UNION ALL
+                SELECT r.id, 'STAT' AS kind, q.definition->>'title' AS title, r.quiz_version AS version,
+                    r.created_at, r.tasks_correct AS correct, r.tasks_total AS total
+                FROM stat_quiz_results r JOIN stat_quizzes q ON r.stat = q.stat AND r.quiz_version = q.version
+                WHERE r.owner_id = ?
                 ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?
                 """, (row, index) -> new Entry(row.getObject("id", UUID.class),
                 row.getString("kind"), row.getString("title"), row.getInt("version"),
                 row.getTimestamp("created_at").toInstant(),
                 row.getObject("correct", Integer.class), row.getObject("total", Integer.class)),
-                principal.accountId(), principal.accountId(), size + 1, (long) page * size);
+                principal.accountId(), principal.accountId(), principal.accountId(), size + 1, (long) page * size);
         return new History(rows.stream().limit(size).toList(), page, size, rows.size() > size);
     }
 

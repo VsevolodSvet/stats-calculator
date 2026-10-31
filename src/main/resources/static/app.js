@@ -1,5 +1,7 @@
 import { createPractice } from "./practice.js";
 import { createAccount } from "./account.js";
+import { createQuizzes } from "./quizzes.js";
+import { createPhoto } from "./photo.js";
 
 const view = document.querySelector("#view");
 const message = document.querySelector("#message");
@@ -15,6 +17,27 @@ const practice = createPractice({
     view, element, button, link, heading, request, showError, announce,
     loading, loadFailure, route, shareLink,
     privacy: account.privacy, expectation: account.expectation, identity: account.identity,
+    isCurrent: token => token === navigation,
+    setSaving: value => {
+        if (value && saving) return false;
+        saving = value;
+        return true;
+    }
+});
+const quizzes = createQuizzes({
+    view, element, button, link, heading, request, showError, announce,
+    loading, loadFailure, route, shareLink, account,
+    isCurrent: token => token === navigation,
+    setSaving: value => {
+        if (value && saving) return false;
+        saving = value;
+        return true;
+    }
+});
+
+const photo = createPhoto({
+    view, element, button, link, heading, request, showError, announce,
+    loading, loadFailure, route, account,
     isCurrent: token => token === navigation,
     setSaving: value => {
         if (value && saving) return false;
@@ -68,11 +91,14 @@ function showError(text, parent = view) {
     error.focus();
 }
 
-async function request(path, options = {}) {
+async function request(path, options = {}, responseType = "json", timeoutMs = 15000) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-        const headers = { Accept: "application/json, application/problem+json", ...options.headers };
+        const headers = {
+            Accept: responseType === "blob" ? "image/png, application/problem+json" : "application/json, application/problem+json",
+            ...options.headers
+        };
         if (options.method && !["GET", "HEAD"].includes(options.method)) {
             const csrfResponse = await fetch("/api/v1/auth/csrf", {
                 credentials: "same-origin", signal: controller.signal, cache: "no-store"
@@ -92,6 +118,7 @@ async function request(path, options = {}) {
             throw error;
         }
         if (response.status === 204 || response.status === 201 && !response.headers.get("content-type")) return null;
+        if (responseType === "blob") return await response.blob();
         return await response.json();
     } catch (error) {
         if (error.name === "AbortError") {
@@ -146,6 +173,11 @@ async function home(token) {
             card.append(actions);
             view.append(card);
         }
+        const statCard = element("article", undefined, "assessment-card");
+        statCard.append(element("h2", "Separate stat quizzes"),
+            element("p", "Explore each S.P.E.C.I.A.L. stat with its own questions, timed tasks or chance games. Sign in for a character sheet using your latest result for each stat."),
+            link("Explore stat quizzes", "#/stat-quizzes", "button primary"));
+        view.append(statCard);
         const practiceCard = element("article", undefined, "assessment-card");
         practiceCard.append(element("p", "OPTIONAL / SEPARATE RESULTS", "metadata"),
             element("h2", "Practice range"),
@@ -411,6 +443,8 @@ async function route() {
     const token = ++navigation;
     attempt = null;
     practice.reset();
+    quizzes.reset();
+    photo.reset();
     loading("Checking terminal access...");
     try {
         await account.refresh(token);
@@ -423,6 +457,8 @@ async function route() {
     const resultMatch = /^#\/results\/([0-9a-f-]{36})$/i.exec(hash);
     if (await account.handle(hash, token) || token !== navigation) return;
     if (await practice.handle(hash, token) || token !== navigation) return;
+    if (await quizzes.handle(hash, token) || token !== navigation) return;
+    if (await photo.handle(hash, token) || token !== navigation) return;
     if (hash === "" || hash === "#/" || hash === "#") await home(token);
     else if (assessmentMatch) {
         let id;
@@ -443,12 +479,12 @@ function canLeave() {
         announce("Please wait for saving to finish.");
         return false;
     }
-    return !(attempt?.answers.size || practice.dirty())
+    return !(attempt?.answers.size || practice.dirty() || quizzes.dirty() || photo.dirty())
         || window.confirm("Leave this assessment? Your unsaved answers will be cleared.");
 }
 
 window.addEventListener("beforeunload", event => {
-    if (saving || attempt?.answers.size || practice.dirty()) event.preventDefault();
+    if (saving || attempt?.answers.size || practice.dirty() || quizzes.dirty() || photo.dirty()) event.preventDefault();
 });
 
 document.addEventListener("click", event => {
@@ -460,7 +496,7 @@ document.addEventListener("click", event => {
     } else if (saving) {
         event.preventDefault();
         announce("Please wait for the save to finish before leaving this record.");
-    } else if ((attempt?.answers.size || practice.dirty())
+    } else if ((attempt?.answers.size || practice.dirty() || quizzes.dirty() || photo.dirty())
             && !["#review", "#practice-review", "#main"].includes(anchor.hash)) {
         if (!window.confirm("Leave this assessment? Your unsaved answers will be cleared.")) event.preventDefault();
     }

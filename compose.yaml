@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: stats_calculator
+      POSTGRES_USER: stats_calculator
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD before starting Compose}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stats_calculator -d stats_calculator"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build: .
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/stats_calculator
+      DB_USERNAME: stats_calculator
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD before starting Compose}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

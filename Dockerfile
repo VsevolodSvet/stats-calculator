@@ -1,11 +1,11 @@
 # Build
-FROM maven:3.6.0-jdk-11-slim AS build
+FROM maven:3.9.11-eclipse-temurin-21 AS build
 COPY pom.xml /app/
 COPY src /app/src
-RUN mvn -f /app/pom.xml clean package
+RUN mvn -B -ntp -f /app/pom.xml clean package
 
 # Run
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:21-jre
 COPY --from=build /app/target/*.jar /app/app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

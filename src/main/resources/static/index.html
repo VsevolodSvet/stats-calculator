@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <meta name="description" content="A retro character sheet for a playful S.P.E.C.I.A.L. self-assessment.">
+    <title>S.P.E.C.I.A.L. / Personnel terminal</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to terminal content</a>
+<div class="console">
+    <header class="console-header">
+        <a class="brand" href="#/" aria-label="S.P.E.C.I.A.L. terminal home">
+            <span class="brand-mark" aria-hidden="true">S / 07</span>
+            <span>S.P.E.C.I.A.L.<small>PERSONNEL EVALUATION TERMINAL</small></span>
+        </a>
+        <span class="hardware-label">MODEL SC-21 <span class="lamp" aria-hidden="true"></span></span>
+    </header>
+    <div class="console-body">
+        <aside class="attribute-strip" aria-label="The seven attributes">
+            <span><b>S</b> Strength</span><span><b>P</b> Perception</span>
+            <span><b>E</b> Endurance</span><span><b>C</b> Charisma</span>
+            <span><b>I</b> Intelligence</span><span><b>A</b> Agility</span>
+            <span><b>L</b> Luck</span>
+        </aside>
+        <main id="main" class="screen" tabindex="-1">
+            <nav id="account-nav" class="account-nav" aria-label="Account"></nav>
+            <div class="screen-topline"><span>PERSONNEL ARCHIVE</span><span>LOCAL TERMINAL / ONLINE</span></div>
+            <div id="view" aria-busy="true">
+                <h1 tabindex="-1">Connecting to the archive...</h1>
+                <p>Loading available assessments.</p>
+            </div>
+            <noscript><p class="notice">JavaScript is required to load questions and submit this assessment.
+                Enable JavaScript and reload the page.</p></noscript>
+            <div id="message" role="status" aria-live="polite"></div>
+        </main>
+    </div>
+    <footer class="console-footer">
+        <span>SELF-REFLECTION / NOT A DIAGNOSIS</span>
+        <span>NO ACCOUNT REQUIRED <span class="vent" aria-hidden="true"></span></span>
+    </footer>
+</div>
+<p class="outside-note">An independent, Fallout-inspired experiment. Original interface; no game assets.</p>
+</body>
+</html>

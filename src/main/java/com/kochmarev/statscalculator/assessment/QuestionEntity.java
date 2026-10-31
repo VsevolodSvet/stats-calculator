@@ -27,6 +27,7 @@ class QuestionEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assessment_version_id")
     private AssessmentVersion assessment;
+    @Column(nullable = false)
     private int position;
     @Enumerated(EnumType.STRING)
     private Attribute attribute;
@@ -38,6 +39,7 @@ class QuestionEntity {
     private List<OptionEntity> options;
 
     protected QuestionEntity() {
+        // Required by JPA.
     }
 
     AssessmentDefinition.Question definition() {

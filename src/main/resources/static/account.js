@@ -1,3 +1,8 @@
+function clearCredentials(password, confirm) {
+    password.value = "";
+    if (confirm) confirm.value = "";
+}
+
 export function createAccount(ui) {
     const { view, element, button, link, heading, request, showError,
         loading, loadFailure, route, isCurrent, announce, canLeave } = ui;
@@ -19,7 +24,7 @@ export function createAccount(ui) {
                     try {
                         await request("/auth/logout", { method: "POST" });
                         session = null;
-                        if (window.location.hash === "#/") route();
+                        if (window.location.hash === "#/") await route();
                         else window.location.hash = "/";
                     } catch (error) {
                         announce(`Sign out failed: ${error.message}`);
@@ -40,6 +45,46 @@ export function createAccount(ui) {
 
     function expectation() {
         return session?.authenticated ? "PRIVATE" : "UNLISTED";
+    }
+
+    async function authenticate(register, username, password) {
+        if (register) {
+            await request("/auth/register", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+            registrationComplete = true;
+            return "#/login";
+        }
+        await request("/auth/login", {
+            method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ username, password })
+        });
+        const destination = loginDestination;
+        loginDestination = "#/my-results";
+        return destination;
+    }
+
+    async function submitAuth(event, register, { form, username, password, confirm, submit }) {
+        event.preventDefault();
+        if (confirm && confirm.value !== password.value) {
+            showError("Passwords do not match.", form);
+            return;
+        }
+        if (submit.disabled) return;
+        submit.disabled = true;
+        form.querySelector(".error")?.remove();
+        try {
+            const destination = await authenticate(register, username.value, password.value);
+            clearCredentials(password, confirm);
+            window.location.hash = destination;
+        } catch (error) {
+            if (!form.isConnected) return;
+            clearCredentials(password, confirm);
+            showError(error.message, form);
+        } finally {
+            submit.disabled = false;
+        }
     }
 
     function authForm(register) {
@@ -92,42 +137,7 @@ export function createAccount(ui) {
             register ? "#/login" : "#/register"));
         form.append(actions);
         form.addEventListener("submit", async event => {
-            event.preventDefault();
-            if (confirm && confirm.value !== password.value) {
-                showError("Passwords do not match.", form);
-                return;
-            }
-            if (submit.disabled) return;
-            submit.disabled = true;
-            form.querySelector(".error")?.remove();
-            try {
-                if (register) {
-                    await request("/auth/register", {
-                        method: "POST", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ username: username.value, password: password.value })
-                    });
-                    password.value = "";
-                    confirm.value = "";
-                    registrationComplete = true;
-                    window.location.hash = "/login";
-                } else {
-                    await request("/auth/login", {
-                        method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                        body: new URLSearchParams({ username: username.value, password: password.value })
-                    });
-                    password.value = "";
-                    const destination = loginDestination;
-                    loginDestination = "#/my-results";
-                    window.location.hash = destination;
-                }
-            } catch (error) {
-                if (!form.isConnected) return;
-                password.value = "";
-                if (confirm) confirm.value = "";
-                showError(error.message, form);
-            } finally {
-                submit.disabled = false;
-            }
+            await submitAuth(event, register, { form, username, password, confirm, submit });
         });
         view.append(form, link("Continue anonymously", "#/"));
         if (!register && registrationComplete) {
@@ -146,6 +156,15 @@ export function createAccount(ui) {
         view.append(actions);
     }
 
+    function historyRow(result) {
+        const row = element("li");
+        const hash = result.kind === "SPECIAL" ? `#/results/${result.id}` : `#/practice/results/${result.id}`;
+        row.append(element("p", `${result.kind} / V${result.version} / ${new Date(result.createdAt).toLocaleString()}`, "metadata"),
+            link(result.title, hash, "history-title"));
+        if (result.kind === "PRACTICE") row.append(element("p", `${result.correct} of ${result.total} correct`, "metadata"));
+        return row;
+    }
+
     async function history(page, token) {
         if (!session?.authenticated) {
             signInPrompt();
@@ -161,14 +180,7 @@ export function createAccount(ui) {
                 "notice"));
             if (data.items.length === 0) view.append(element("p", "No results on this page. Start an assessment or practice activity to create a private record."));
             const list = element("ol", undefined, "history-list");
-            for (const result of data.items) {
-                const row = element("li");
-                const hash = result.kind === "SPECIAL" ? `#/results/${result.id}` : `#/practice/results/${result.id}`;
-                row.append(element("p", `${result.kind} / V${result.version} / ${new Date(result.createdAt).toLocaleString()}`, "metadata"),
-                    link(result.title, hash, "history-title"));
-                if (result.kind === "PRACTICE") row.append(element("p", `${result.correct} of ${result.total} correct`, "metadata"));
-                list.append(row);
-            }
+            list.append(...data.items.map(historyRow));
             view.append(list);
             const actions = element("div", undefined, "actions");
             if (page > 0) actions.append(link("Newer results", `#/my-results/${page - 1}`));
@@ -183,15 +195,15 @@ export function createAccount(ui) {
         }
     }
 
-    function handle(hash, token) {
+    async function handle(hash, token) {
         if (hash === "#/login" || hash === "#/register") {
-            if (session?.authenticated) history(0, token);
+            if (session?.authenticated) await history(0, token);
             else authForm(hash === "#/register");
             return true;
         }
-        const match = hash.match(/^#\/my-results(?:\/(\d+))?$/);
+        const match = /^#\/my-results(?:\/(\d+))?$/.exec(hash);
         if (match) {
-            history(Number(match[1] || 0), token);
+            await history(Number(match[1] || 0), token);
             return true;
         }
         return false;

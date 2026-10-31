@@ -54,6 +54,57 @@ class TerminalBrowserTest(unittest.TestCase):
             path.mkdir(parents=True, exist_ok=True)
             self.page.screenshot(path=str(path / name), full_page=True)
 
+    def test_theme_contrast_hidden_controls_and_native_status(self):
+        self.page.goto(BASE_URL)
+        expect(self.page.get_by_role("heading", name="Discover your S.P.E.C.I.A.L.")).to_be_visible()
+        expect(self.page.locator("#message")).to_have_js_property("tagName", "OUTPUT")
+        ratios = self.page.evaluate(r"""() => {
+            const luminance = rgb => {
+                const [r, g, b] = rgb.map(value => {
+                    const channel = value / 255;
+                    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+                });
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            };
+            const colors = text => Array.from(text.matchAll(/rgba?\(([^)]+)\)/g),
+                match => match[1].split(",").slice(0, 3).map(Number));
+            const brightestBackground = selector => Math.max(...colors(
+                getComputedStyle(document.querySelector(selector)).backgroundImage).map(luminance));
+            const consoleBackground = brightestBackground(".console");
+            const bodyBackground = brightestBackground("body");
+            const ratios = [".brand small", ".hardware-label", ".attribute-strip span",
+                ".console-footer", ".outside-note"].map(selector => {
+                    const foreground = luminance(colors(getComputedStyle(document.querySelector(selector)).color)[0]);
+                    const background = selector === ".outside-note" ? bodyBackground : consoleBackground;
+                    return {selector, ratio: (foreground + 0.05) / (background + 0.05)};
+                });
+            for (const className of ["notice", "assessment-card", "option", "error"]) {
+                const sample = document.createElement("p");
+                sample.className = className;
+                sample.textContent = "Contrast sample";
+                if (className === "option") {
+                    const input = document.createElement("input");
+                    input.type = "checkbox";
+                    input.checked = true;
+                    sample.append(input);
+                }
+                document.querySelector("#view").append(sample);
+                const style = getComputedStyle(sample);
+                const foreground = luminance(colors(style.color)[0]);
+                const background = luminance(colors(style.backgroundColor)[0]);
+                ratios.push({selector: `.${className}`, ratio: (foreground + 0.05) / (background + 0.05)});
+                sample.remove();
+            }
+            return ratios;
+        }""")
+        for result in ratios:
+            self.assertGreaterEqual(result["ratio"], 4.5, result["selector"])
+        for selector in ("a.button", "#account-nav", ".console-footer > span:last-child", ".screen"):
+            node = self.page.locator(selector).first
+            node.evaluate("(node) => { node.hidden = true; }")
+            expect(node).to_be_hidden()
+            node.evaluate("(node) => { node.hidden = false; }")
+
     def test_keyboard_journey_reopen_copy_and_retake(self):
         self.page.goto(BASE_URL)
         expect(self.page.get_by_role("heading", name="Discover your S.P.E.C.I.A.L.")).to_be_visible()

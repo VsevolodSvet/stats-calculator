@@ -30,6 +30,7 @@ class PracticeActivity {
     private Content content;
 
     protected PracticeActivity() {
+        // Required by JPA.
     }
 
     String id() { return id; }
@@ -41,12 +42,16 @@ class PracticeActivity {
     boolean coordination() { return coordination; }
     Content content() { return content; }
 
+    // These are immutable JSON records, not methods; their constructors/accessors are compiler-generated.
+    @SuppressWarnings({"java:S100", "java:S1186", "java:S1845"})
     public record Content(List<Item> items) {
     }
 
+    @SuppressWarnings({"java:S100", "java:S1186"})
     public record Item(String id, String prompt, String correctOptionId, List<Option> options) {
     }
 
+    @SuppressWarnings({"java:S100", "java:S1186"})
     public record Option(String id, String label) {
     }
 }

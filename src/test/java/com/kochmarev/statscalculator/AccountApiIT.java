@@ -41,7 +41,7 @@ class AccountApiIT {
 
     @Container
     static final PostgreSQLContainer database = new PostgreSQLContainer("postgres:17");
-    private static final String PASSWORD = "correct horse battery staple";
+    private static final String PASSWORD = UUID.randomUUID().toString();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
@@ -50,11 +50,21 @@ class AccountApiIT {
         registry.add("spring.datasource.password", database::getPassword);
     }
 
-    @Autowired private MockMvc mvc;
-    @Autowired private ObjectMapper json;
-    @Autowired private JdbcTemplate jdbc;
-    @Autowired private PasswordEncoder encoder;
-    @Autowired private AssessmentService assessments;
+    private final MockMvc mvc;
+    private final ObjectMapper json;
+    private final JdbcTemplate jdbc;
+    private final PasswordEncoder encoder;
+    private final AssessmentService assessments;
+
+    @Autowired
+    AccountApiIT(MockMvc mvc, ObjectMapper json, JdbcTemplate jdbc,
+                 PasswordEncoder encoder, AssessmentService assessments) {
+        this.mvc = mvc;
+        this.json = json;
+        this.jdbc = jdbc;
+        this.encoder = encoder;
+        this.assessments = assessments;
+    }
 
     @Test
     void registrationValidatesAndStoresOnlyASaltedPasswordHash() throws Exception {
@@ -87,7 +97,7 @@ class AccountApiIT {
     void realCsrfFlowRotatesSessionAndLogoutInvalidatesIt() throws Exception {
         String username = username();
         register(username);
-        var token = token(null);
+        var token = fetchCsrfSession(null);
         String previousId = token.session().getId();
         var login = mvc.perform(post("/api/v1/auth/login").session(token.session())
                         .with(request -> {
@@ -108,7 +118,7 @@ class AccountApiIT {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.items.length()").value(0));
         mvc.perform(post("/api/v1/auth/logout").session(session).header(token.header(), token.value()))
                 .andExpect(status().isForbidden());
-        var refreshed = token(session);
+        var refreshed = fetchCsrfSession(session);
         mvc.perform(post("/api/v1/auth/logout").session(session).header(refreshed.header(), refreshed.value()))
                 .andExpect(status().isNoContent());
         assertThat(session.isInvalid()).isTrue();
@@ -128,7 +138,7 @@ class AccountApiIT {
         register(name);
         for (String loginName : List.of(name, "missing_" + name)) {
             mvc.perform(post("/api/v1/auth/login").with(csrf()).param("username", loginName)
-                            .param("password", "wrong password"))
+                            .param("password", UUID.randomUUID().toString()))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.detail").value("Invalid username or password."));
         }
@@ -238,12 +248,12 @@ class AccountApiIT {
                 .andExpect(status().isCreated());
     }
 
-    private Token token(MockHttpSession session) throws Exception {
+    private CsrfSession fetchCsrfSession(MockHttpSession session) throws Exception {
         MockHttpServletRequestBuilder builder = get("/api/v1/auth/csrf");
         if (session != null) builder.session(session);
         var result = mvc.perform(builder).andExpect(status().isOk()).andReturn();
         var tree = json.readTree(result.getResponse().getContentAsString());
-        return new Token((MockHttpSession) result.getRequest().getSession(false),
+        return new CsrfSession((MockHttpSession) result.getRequest().getSession(false),
                 tree.get("headerName").asString(), tree.get("token").asString());
     }
 
@@ -251,6 +261,8 @@ class AccountApiIT {
         return "user_" + UUID.randomUUID().toString().substring(0, 8);
     }
 
-    private record Token(MockHttpSession session, String header, String value) {
+    // Record components generate the canonical constructor and accessors; this is not an empty method.
+    @SuppressWarnings({"java:S100", "java:S1186", "java:S1172"})
+    private record CsrfSession(MockHttpSession session, String header, String value) {
     }
 }

@@ -46,9 +46,16 @@ class PracticeApiIT {
         registry.add("spring.datasource.password", database::getPassword);
     }
 
-    @Autowired private MockMvc mvc;
-    @Autowired private ObjectMapper json;
-    @Autowired private JdbcTemplate jdbc;
+    private final MockMvc mvc;
+    private final ObjectMapper json;
+    private final JdbcTemplate jdbc;
+
+    @Autowired
+    PracticeApiIT(MockMvc mvc, ObjectMapper json, JdbcTemplate jdbc) {
+        this.mvc = mvc;
+        this.json = json;
+        this.jdbc = jdbc;
+    }
 
     @Test
     void exposesThreeActivitiesWithoutChoiceAnswerKeys() throws Exception {

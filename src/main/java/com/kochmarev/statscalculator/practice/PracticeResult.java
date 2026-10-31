@@ -29,6 +29,7 @@ class PracticeResult {
     private int total;
 
     protected PracticeResult() {
+        // Required by JPA.
     }
 
     PracticeResult(PracticeActivity activity, SubmitPractice request, int correct, UUID ownerId) {
@@ -62,6 +63,8 @@ class PracticeResult {
                 ownerId != null);
     }
 
+    // Keep the published flat JSON contract; the record generates its constructor and accessors.
+    @SuppressWarnings({"java:S100", "java:S1186", "java:S1845", "java:S107"})
     public record Response(UUID id, String activityId, int activityVersion, int scoringVersion,
                            String title, Instant createdAt, SubmitPractice.Mode mode,
                            SubmitPractice.InputMethod inputMethod, Long elapsedMs,

@@ -209,7 +209,8 @@ docker compose up --build -d
 docker compose logs -f app
 ```
 
-The image builds and runs with Java 21. Its build stage runs unit tests; run
+The image builds and runs with Java 21; the runtime uses an unprivileged `app`
+user. Its build stage runs unit tests; run
 `.\mvnw.cmd verify` on the host for Docker-backed integration tests (the Docker
 build does not require access to a nested Docker daemon). Wait for the
 `Started StatsCalculatorApplication` log before making requests. Stop following

@@ -186,7 +186,7 @@ export function createPractice(ui) {
     }
 
     function interrupt() {
-        if (!draft || draft.mode !== "TIMED" || draft.startedAt === null
+        if (draft?.mode !== "TIMED" || draft.startedAt === null
                 || draft.elapsedMs !== null || draft.interrupted) return;
         stopClock();
         draft.interrupted = true;
@@ -254,9 +254,9 @@ export function createPractice(ui) {
         const actions = element("div", undefined, "actions");
         actions.append(submit);
         form.append(label, actions);
-        form.addEventListener("submit", event => {
+        form.addEventListener("submit", async event => {
             event.preventDefault();
-            if (draft.consent) save(form, submit);
+            if (draft.consent) await save(form, submit);
         });
         view.append(form);
     }
@@ -326,13 +326,13 @@ export function createPractice(ui) {
         }
     }
 
-    function handle(hash, token) {
+    async function handle(hash, token) {
         if (hash === "#/practice") {
-            catalogue(token);
+            await catalogue(token);
             return true;
         }
-        const activity = hash.match(/^#\/practice\/activities\/([^/]+)\/([1-9]\d*)$/);
-        const saved = hash.match(/^#\/practice\/results\/([0-9a-f-]{36})$/i);
+        const activity = /^#\/practice\/activities\/([^/]+)\/([1-9]\d*)$/.exec(hash);
+        const saved = /^#\/practice\/results\/([0-9a-f-]{36})$/i.exec(hash);
         if (activity) {
             let id;
             try {
@@ -341,15 +341,15 @@ export function createPractice(ui) {
                 loadFailure(new Error("Malformed practice activity address."), route, "Unknown address");
                 return true;
             }
-            start(id, activity[2], token);
+            await start(id, activity[2], token);
             return true;
         }
         if (saved) {
-            result(saved[1], token);
+            await result(saved[1], token);
             return true;
         }
         return false;
     }
 
-    return { handle, reset, dirty: () => Boolean(draft && (draft.startedAt !== null || draft.selections.size)) };
+    return { handle, reset, dirty: () => Boolean(draft?.startedAt != null || draft?.selections.size) };
 }

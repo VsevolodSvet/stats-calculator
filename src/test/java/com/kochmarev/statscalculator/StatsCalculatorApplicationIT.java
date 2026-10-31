@@ -57,20 +57,21 @@ class StatsCalculatorApplicationIT {
         properties.add("spring.datasource.password", database::getPassword);
     }
 
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
+    private final MockMvc mvc;
+    private final AssessmentService assessments;
+    private final ObjectMapper json;
+    private final JdbcTemplate jdbc;
 
     @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private AssessmentService assessments;
-
-    @Autowired
-    private ObjectMapper json;
-
-    @Autowired
-    private JdbcTemplate jdbc;
+    StatsCalculatorApplicationIT(ApplicationContext context, MockMvc mvc, AssessmentService assessments,
+                                 ObjectMapper json, JdbcTemplate jdbc) {
+        this.context = context;
+        this.mvc = mvc;
+        this.assessments = assessments;
+        this.json = json;
+        this.jdbc = jdbc;
+    }
 
     @Test
     void applicationStartsWithoutDemoOrGeneratedUsers() {

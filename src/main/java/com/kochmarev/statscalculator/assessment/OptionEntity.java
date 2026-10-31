@@ -1,5 +1,6 @@
 package com.kochmarev.statscalculator.assessment;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -19,11 +20,13 @@ class OptionEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
     private QuestionEntity question;
+    @Column(nullable = false)
     private int position;
     private String label;
     private int scoreValue;
 
     protected OptionEntity() {
+        // Required by JPA.
     }
 
     AssessmentDefinition.Option definition() {

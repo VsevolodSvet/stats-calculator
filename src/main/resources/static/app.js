@@ -280,13 +280,13 @@ function showReview() {
     submit.type = "submit";
     actions.append(submit);
     form.append(actions);
-    form.addEventListener("submit", event => {
+    form.addEventListener("submit", async event => {
         event.preventDefault();
         if (!attempt.consent || attempt.answers.size !== attempt.assessment.questions.length) {
             showError("Answer every question and acknowledge the sharing notice before saving.", form);
             return;
         }
-        save(form, submit);
+        await save(form, submit);
     });
     view.append(form);
 }
@@ -419,10 +419,11 @@ async function route() {
         return;
     }
     if (token !== navigation) return;
-    const assessmentMatch = hash.match(/^#\/assessments\/([^/]+)\/([1-9]\d*)$/);
-    const resultMatch = hash.match(/^#\/results\/([0-9a-f-]{36})$/i);
-    if (account.handle(hash, token) || practice.handle(hash, token)) return;
-    if (hash === "" || hash === "#/" || hash === "#") home(token);
+    const assessmentMatch = /^#\/assessments\/([^/]+)\/([1-9]\d*)$/.exec(hash);
+    const resultMatch = /^#\/results\/([0-9a-f-]{36})$/i.exec(hash);
+    if (await account.handle(hash, token) || token !== navigation) return;
+    if (await practice.handle(hash, token) || token !== navigation) return;
+    if (hash === "" || hash === "#/" || hash === "#") await home(token);
     else if (assessmentMatch) {
         let id;
         try {
@@ -431,9 +432,9 @@ async function route() {
             loadFailure(new Error("The assessment address is malformed. Return to the archive to begin."), route, "Unknown address");
             return;
         }
-        startAssessment(id, assessmentMatch[2], token);
+        await startAssessment(id, assessmentMatch[2], token);
     }
-    else if (resultMatch) showResult(resultMatch[1], token);
+    else if (resultMatch) await showResult(resultMatch[1], token);
     else loadFailure(new Error("This terminal address is not recognized. Return to the archive to begin."), route, "Unknown address");
 }
 
@@ -465,5 +466,5 @@ document.addEventListener("click", event => {
     }
 });
 
-window.addEventListener("hashchange", route);
-route();
+window.addEventListener("hashchange", () => { void route(); });
+await route();

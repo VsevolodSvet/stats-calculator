@@ -1,3 +1,8 @@
+@layer terminal;
+
+[hidden] { display: none; }
+
+@layer terminal {
 :root {
     color-scheme: dark;
     --amber: #f5cb83;
@@ -13,7 +18,6 @@
 }
 
 * { box-sizing: border-box; }
-[hidden] { display: none !important; }
 body {
     margin: 0;
     padding: 38px 24px 20px;
@@ -24,8 +28,8 @@ body {
 a { color: var(--amber); text-underline-offset: 4px; }
 button, input { font: inherit; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
-button, .button { min-height: 46px; }
 button, .button {
+    min-height: 46px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -84,13 +88,13 @@ h1:focus, h2:focus, legend:focus, main:focus { outline: none; }
     padding: 24px 10px;
 }
 .brand { display: flex; align-items: center; gap: 18px; text-decoration: none; font-weight: bold; font-size: 1.4rem; letter-spacing: 2px; color: #f0dfb8; }
-.brand small { display: block; font-size: .64rem; letter-spacing: 1px; color: #d3c7ac; margin-top: 3px; }
+.brand small { display: block; font-size: .64rem; letter-spacing: 1px; color: #f0dfb8; margin-top: 3px; }
 .brand-mark { padding: 10px; border: 2px solid #aa9d80; border-radius: 50%; font-size: .9rem; letter-spacing: 0; white-space: nowrap; }
-.hardware-label { font-size: .7rem; color: #ded0b3; white-space: nowrap; }
+.hardware-label { font-size: .7rem; color: #f0dfb8; white-space: nowrap; }
 .lamp { display: inline-block; width: 9px; height: 9px; background: #b5d59a; border-radius: 50%; margin-left: 10px; box-shadow: 0 0 7px #b5d59a80; }
 .console-body { display: grid; grid-template-columns: 145px minmax(0, 1fr); gap: 18px; }
 .attribute-strip { display: flex; flex-direction: column; justify-content: space-evenly; gap: 12px; padding: 18px 0; }
-.attribute-strip span { display: flex; align-items: center; gap: 9px; color: #e6d9bb; font-size: .75rem; }
+.attribute-strip span { display: flex; align-items: center; gap: 9px; color: #f0dfb8; font-size: .75rem; }
 .attribute-strip b { font-size: 1.25rem; border: 1px solid #93856a; background: #232820; color: var(--amber); padding: 2px 9px; box-shadow: inset 0 2px 4px #000; }
 .screen {
     background: radial-gradient(ellipse at top, #25352a44, transparent 85%), var(--ink);
@@ -107,16 +111,16 @@ h1 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); font-weight: normal; line-height: 
 h2 { font-size: 1.1rem; line-height: 1.4; margin-top: 0; }
 p { margin: 0 0 18px; }
 .intro { max-width: 55ch; color: #e0d6b7; }
-.notice { border-left: 3px solid #a68e60; padding: 12px 16px; background: #cab4790a; color: #ddd1af; font-size: .85rem; }
-.assessment-card { border: 1px solid var(--line); padding: 22px; margin: 24px 0; background: #b5d59a05; }
+.notice { border-left: 3px solid #a68e60; padding: 12px 16px; background: #1d281f; color: #ddd1af; font-size: .85rem; }
+.assessment-card { border: 1px solid var(--line); padding: 22px; margin: 24px 0; background: #19271e; }
 .assessment-card h2 { color: var(--amber); }
 .metadata { font-size: .75rem; color: var(--green); }
 .actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
 .secondary { background: transparent; color: #d7cead; border-color: #686e57; }
-.console-footer { color: #d5c7ac; font-size: .64rem; letter-spacing: 1px; }
+.console-footer { color: #f0dfb8; font-size: .64rem; letter-spacing: 1px; }
 .console-footer > span:last-child { display: flex; align-items: center; gap: 18px; }
 .vent { width: 70px; height: 20px; display: inline-block; background: repeating-linear-gradient(90deg, #1d211c 0 3px, #595a49 3px 8px); border: 1px solid #72705c; }
-.outside-note { text-align: center; font-size: .67rem; color: #aca993; margin: 20px 0 0; }
+.outside-note { text-align: center; font-size: .67rem; color: var(--muted); margin: 20px 0 0; }
 progress { display: block; width: 100%; height: 9px; accent-color: var(--green); margin: 10px 0 24px; border: none; background: #333e2e; border-radius: 0; }
 progress::-webkit-progress-bar { background: #333e2e; }
 progress::-webkit-progress-value { background: var(--green); }
@@ -124,8 +128,8 @@ progress::-moz-progress-bar { background: var(--green); }
 fieldset { border: none; padding: 0; margin: 0; min-width: 0; }
 legend { padding: 0; margin-bottom: 24px; font-size: 1.25rem; line-height: 1.5; color: #ffe1a0; width: 100%; }
 .option { display: flex; align-items: center; gap: 14px; border: 1px solid #536047; padding: 12px 16px; margin: 10px 0; min-height: 50px; cursor: pointer; color: #d8d7b8; }
-.option:hover { background: #a4bb8a12; }
-.option:has(input:checked) { border-color: var(--amber); background: #e5c27e12; color: #ffe1a0; }
+.option:hover { background: #202f24; }
+.option:has(input:checked) { border-color: var(--amber); background: #253026; color: #ffe1a0; }
 .option:has(input:focus-visible) { outline: 3px solid #ffe4ac; outline-offset: 3px; }
 .option input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--amber); margin: 0; }
 .option input:focus-visible { outline: none; }
@@ -135,9 +139,9 @@ legend { padding: 0; margin-bottom: 24px; font-size: 1.25rem; line-height: 1.5; 
 .review-list li { border-bottom: 1px solid #56604766; padding: 12px 0; }
 .review-list a { font-size: .88rem; }
 .review-answer { display: block; color: var(--green); font-size: .8rem; margin-top: 5px; }
-.error { color: #ffd2be; border: 1px solid #c78569; background: #542f2544; padding: 15px; margin-top: 20px; }
+.error { color: #ffd2be; border: 1px solid #c78569; background: #28251e; padding: 15px; margin-top: 20px; }
 .error:focus { outline: 2px solid #ffd2be; outline-offset: 4px; }
-#message:not(:empty) { margin-top: 20px; font-size: .85rem; }
+#message:not(:empty) { display: block; margin-top: 20px; font-size: .85rem; }
 .score-grid { display: grid; gap: 14px; margin: 24px 0; }
 .stat { display: grid; grid-template-columns: 42px minmax(0, 1fr) 62px; align-items: center; gap: 16px; border-bottom: 1px solid #56604788; padding-bottom: 16px; }
 .stat-letter { font-size: 1.6rem; color: #d5e0bb; text-align: center; }
@@ -193,4 +197,5 @@ meter::-moz-meter-bar { background: #b5d59a; }
 
 @media (prefers-reduced-motion: reduce) {
     button:active:not(:disabled), .button:active { transform: none; }
+}
 }
